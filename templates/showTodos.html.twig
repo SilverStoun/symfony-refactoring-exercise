@@ -3,18 +3,39 @@
     <head>
         <meta charset="UTF-8">
         <title>Todos</title>
+
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        
     </head>
     <body>
-        <h1>Todo</h1>
-        <p><a href="{{ path('showTodos') }}?all=1">Show completed</a></p>
-        <ul>
-            {% for todo in todos %}
-                {% if todo.completed %}
-                    <li><s>{{ todo.text }}</s> | <a href="{{ path('uncompleteTodo') }}?id={{ todo.id }}">Reset</a></li>
-                {% else %}
-                    <li>{{ todo.text }} | <a href="{{ path('completeTodo') }}?id={{ todo.id }}">Complete</a></li>
-                {% endif %}
-            {% endfor %}
-        </ul>
+        <div class="container bg-light text-dark">
+            <div class="d-flex justify-content-center">
+                <div class="d-flex flex-column bd-highlight mb-3">
+                    <div class="p-2 bd-highlight">
+                        <h1>Todo</h1>
+                    </div>
+                    <div class="p-2 bd-highlight">
+                        {% if all == false %}
+                            <a href="{{ path('showTodos') }}?all=1">Show completed</a>
+                        {% else %}
+                            <a href="{{ path('showTodos') }}">Hide completed</a>
+                        {% endif %}
+                    </div>
+                    <div class="p-2 bd-highlight">
+                        <table class="table">
+                            {% for todo in todos %}
+                            <tr>
+                                {% if todo.completed %}
+                                    <td><s>{{ todo.text }}</s></td><td><a href="{{ path('changeTask') }}?id={{ todo.id }}&change=0&all={{all}}"><button type="button" class="btn btn-danger btn-sm button-reset">Reset</button></a></td>
+                                {% else %}
+                                    <td>{{ todo.text }}</td><td><a href="{{ path('changeTask') }}?id={{ todo.id }}&change=1&all={{all}}"><button type="button" class="btn btn-success btn-sm button-complete">Complete</button></a></td>
+                                {% endif %}
+                            </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </body>
 </html>

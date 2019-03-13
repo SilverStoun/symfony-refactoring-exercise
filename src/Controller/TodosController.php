@@ -2,33 +2,58 @@
 
 namespace App\Controller;
 
-use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use App\Entity\Todos;
 
 class TodosController extends AbstractController
 {
-    public function showTodos(Connection $connection)
+    /**
+     * Отобразить задачи
+     */
+    public function showTodos()
     {
+        // Смотрим какие задачи надо показать, если передано ?all=1, значит показать и выполненные
         if (isset($_GET['all']) && $_GET['all'] == '1') {
-            $todos = $connection->fetchAll('SELECT t.* FROM todos t');
+            // Получаем массив с задачами
+            $todos = $this->getDoctrine()
+                            ->getRepository(Todos::class)
+                            ->findAll();
         } else {
-            $todos = $connection->fetchAll('SELECT t.* FROM todos t WHERE completed = 0');
+            // Иначе показать только не выполненные
+            // Получаем массив с задачами с условием 'completed' == '0'
+            $todos = $this->getDoctrine()
+                            ->getRepository(Todos::class)
+                            ->findBy(['completed' => '0']);
         }
 
-        return $this->render('showTodos.html.twig', ['todos' => $todos]);
+        // Рендерим вьюху и передаем данные
+        return $this->render('showTodos.html.twig', ['todos' => $todos, 'all' => isset($_GET['all']) && $_GET['all'] == '1']);
     }
 
-    public function completeTodo(Connection $connection)
+    /**
+     * Изменить состояние задачи
+     */
+    public function changeTask()
     {
-        $connection->executeQuery('UPDATE todos SET completed = 1 WHERE id = ' . $_GET['id']);
+        // Получаем доктрин-менеджер
+        $em = $this->getDoctrine()->getManager();
+        // Получаем модель с нужным id
+        $todo = $em->getRepository(Todos::class)->find($_GET['id']);
 
-        return $this->redirect('/');
-    }
+        // Если модель не найдена
+        if (!$todo) {
+            // Выкидываем ошибку
+            throw $this->createNotFoundException(
+                'No todo found for id ' . $_GET['id']
+            );
+        }
 
-    public function uncompleteTodo(Connection $connection)
-    {
-        $connection->executeQuery('UPDATE todos SET completed = 0 WHERE id = ' . $_GET['id']);
+        // Назначем свойству модели 'Completed' переданное значение
+        $todo->setCompleted($_GET['change']);
+        // Записываем изменения
+        $em->flush();
 
-        return $this->redirect('/');
+        // Редиректим на ту же страницу с которой пришли
+        return $this->redirect($_GET['all'] ? '/?all=1' : '/');
     }
 }

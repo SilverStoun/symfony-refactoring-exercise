@@ -2,10 +2,6 @@ showTodos:
   path: /
   controller: App\Controller\TodosController::showTodos
 
-completeTodo:
-  path: /complete
-  controller: App\Controller\TodosController::completeTodo
-
-uncompleteTodo:
-  path: /uncomplete
-  controller: App\Controller\TodosController::uncompleteTodo
+changeTask:
+  path: /changeTask
+  controller: App\Controller\TodosController::changeTask
